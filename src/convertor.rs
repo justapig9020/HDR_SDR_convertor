@@ -6,7 +6,7 @@ use ndarray::{array, ArrayView1};
 const LHDR: f32 = 1_000.0;
 const LSDR: f32 = 100.0;
 const R: usize = 0;
-const G: usize = 1;
+const _G: usize = 1;
 const B: usize = 2;
 const PIXEL: usize = 2;
 
@@ -42,17 +42,24 @@ fn tone_mapping_step3(yc: f32) -> f32 {
     (p_sdr.powf(yc) - 1.0) / (p_sdr - 1.0)
 }
 
-fn normalize(x: u8) -> f32 {
-    x as f32 / u8::MAX as f32
+fn normalize<T>(x: T) -> f32
+where
+    T: num::Bounded + Into<f32>,
+{
+    x.into() as f32 / T::max_value().into() as f32
 }
 
-pub fn to_sdr(raw: Vec<u8>, hight: u32, width: u32) -> Result<Vec<u8>> {
+pub fn to_sdr<T>(raw: Vec<T>, hight: u32, width: u32) -> Result<Vec<u8>>
+where
+    T: std::fmt::Debug + num::Bounded + Clone,
+    f32: std::convert::From<T>,
+{
     println!("{:?}", &raw[0..6]);
     // shape the raw buffer in to a 3D ndarray
     // The shape of the ndarray is (height, width, 3)
-    let rgb = ndarray::Array3::<u8>::from_shape_vec((hight as usize, width as usize, 3), raw)?;
+    let rgb = ndarray::Array3::<T>::from_shape_vec((hight as usize, width as usize, 3), raw)?;
     println!("rgb {:?}", rgb.shape());
-    let normalized_rgb = rgb.mapv(normalize);
+    let normalized_rgb = rgb.mapv(normalize::<T>);
     // apply the gamma correction
     let linear_rgb = normalized_rgb.mapv(gamma_correction);
 

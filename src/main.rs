@@ -1,5 +1,4 @@
-mod rgb16;
-mod rgb8;
+mod convertor;
 
 use anyhow::{anyhow, Result};
 use image::io::Reader as ImageReader;
@@ -52,7 +51,7 @@ fn hdr_to_sdr(file_name: &str) -> Result<DynamicImage> {
             let width = img.width();
             let height = img.height();
             let raw = img.into_raw();
-            let sdr = rgb8::to_sdr(raw, height, width)?;
+            let sdr = convertor::to_sdr(raw, height, width)?;
             let sdr_img = DynamicImage::ImageRgb8(
                 ImageBuffer::from_raw(width, height, sdr).ok_or_else(|| anyhow!(""))?,
             );
@@ -62,7 +61,7 @@ fn hdr_to_sdr(file_name: &str) -> Result<DynamicImage> {
             let width = img.width();
             let height = img.height();
             let raw = img.into_raw();
-            let sdr = rgb16::to_sdr(raw, height, width)?;
+            let sdr = convertor::to_sdr(raw, height, width)?;
             let sdr_img = DynamicImage::ImageRgb8(
                 ImageBuffer::from_raw(width, height, sdr).ok_or_else(|| anyhow!(""))?,
             );
